@@ -4,7 +4,7 @@ export default class Mankinematic{
     constructor(initial_raw_current){
         // Manipulator robot kinematic 
         // author: lqviet
-        // version: 4.23210
+        // version: 6.23621
         // ### FKman()
         // calculate forward kinematic
 
@@ -49,7 +49,7 @@ export default class Mankinematic{
         this.raw_current = initial_raw_current;
         this.cur_T;
         this.update_cur_T();
-        this.update = false;
+        this.endEffector = 0;
     };
 
     calSlist(){
@@ -203,7 +203,9 @@ export default class Mankinematic{
         // console.log(math.flatten(n_math_angle))
         this.raw_current = math.flatten(n_math_angle);
         this.update_cur_T();
-        this.update = true;
     };
     
+    update_endEffector(val){
+        this.endEffector = val;
+    };
 };

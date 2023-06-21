@@ -13,5 +13,6 @@ This is the web application to control a Open manipulator through website using 
 - Mathjs, Threejs
 
 ## List todo
+- Add the webcam to the client
 
 

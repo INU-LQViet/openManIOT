@@ -2,8 +2,15 @@ import Arm3D from "./arm3D.js";
 import * as THREE from './threejs/three.module.js';
 import {STLLoader} from './threejs/STLLoader.js';
 import Mankinematic from './mathjs/kinematic.js';
+import FirebaseIOT from "./firebase.js";
 
-// get documents
+// firebased
+const appSetting = {
+    databaseURL: "https://openmaniot-default-rtdb.asia-southeast1.firebasedatabase.app/",
+};
+const dataIOT = new FirebaseIOT(appSetting);
+const commendKeys = ["J1","J2","J3","J4","E"];
+
 // buttons
 const position_btns = ["#zplus-btn", "#zneg-btn","#xplus-btn", "#xneg-btn"];
 const set_position = ["ZP","ZN","XP","XN"];
@@ -154,6 +161,15 @@ const solveINV = (rad_phi0, targetT)=>{
     return (solve_goal1.isSolve)? solve_goal1: solve_goal2;
 };
 
+const sendData = (data)=>{
+    let containData = [...data];
+    containData.push(manKi.endEffector);
+    containData.forEach((cm, index)=>{
+        dataIOT.updateCommend(commendKeys[index], cm);
+    });
+};
+
+
 $(document).ready(()=>{
     var canvas = document.getElementById('arm-view');
     var manipulator = new Arm3D(canvas);
@@ -167,7 +183,14 @@ $(document).ready(()=>{
     });
 
     $('#home-btn').click(()=>{
+        // reset the setting.
+        $('#dis-step-input').val(1);
+        $('#rot-step-input').val(10);
+
+        manKi.update_endEffector(0);
         manKi.update_cur_angle(init_data);
+        // console.log(manKi.raw_current);
+        sendData(init_data);
     });
     $('#setting-btn').click(()=>{
         $('#setting-hide-contains').css("display","block");
@@ -175,6 +198,7 @@ $(document).ready(()=>{
     $('#okay-setting-btn').click(()=>{
         $('#setting-hide-contains').css("display","none");
     });
+    // Motion controller
     for(let i =0; i<4; i++){
         $(position_btns[i]).click(()=>{
             let targetT = [];  
@@ -193,8 +217,9 @@ $(document).ready(()=>{
                 if(resultINV.isSolve === true){
                     console.log("It's solved!");
                     manKi.update_cur_angle(manKi.cvRadtoRaw(resultINV.phifinal));          
-                // // socketio.emit('command', {goals:manKi.raw_current});
+                    sendData(manKi.raw_current);
                 }else{
+                    alert("The robot reaches the limitation!");
                     console.log("Error in solving the inv!");
                 };
 
@@ -213,8 +238,9 @@ $(document).ready(()=>{
                     // console.log(frozenCur.get([1]));
                     let tempfinal = [rad_cur[0], frozenCur.get([1]),frozenCur.get([2]),frozenCur.get([3])];
                     manKi.update_cur_angle(manKi.cvRadtoRaw(tempfinal)); 
-                // // socketio.emit('command', {goals:manKi.raw_current});
+                    sendData(manKi.raw_current);
                 }else{
+                    alert("The robot reaches the limitation!");
                     console.log("Error in solving the inv!");
                 };            
             }
@@ -222,47 +248,45 @@ $(document).ready(()=>{
 
         $(UPjoin_btns[i]).click(()=>{
             let maxvalue = 3068;
-            let ang_step = $('#rot-step-output').val();
-            if(manKi.raw_current[i] + 11*ang_step <= maxvalue){
-                let temp = [];
-                manKi.raw_current.forEach((raws, index)=>{
-                    if(index == i){
-                        temp.push(raws+11*ang_step);
-                    }else{
-                        temp.push(raws);
-                    };
-                });     
-                manKi.update_cur_angle(temp);
-                // socketio.emit('command', {goals:manKi.raw_current});
+            let step_rot_val = ($('#rot-step-output').val())*12;
+            if(manKi.raw_current[i] + step_rot_val <= maxvalue){
+                let temp = [0,0,0,0];
+                let tempRaw = [...manKi.raw_current];
+                temp[i] = manKi.raw_current[i] + step_rot_val;
+                tempRaw[i] = manKi.raw_current[i] + step_rot_val;      
+                manKi.update_cur_angle(tempRaw);
+                sendData(temp);
             };
         });
         $(DOWNjoin_btns[i]).click(()=>{
             let minvalue = 1023;
-            let ang_step = $('#rot-step-output').val();
-            if(manKi.raw_current[i] - 11*ang_step >= minvalue){
-                let temp = [];
-                manKi.raw_current.forEach((raws, index)=>{
-                    if(index == i){
-                        temp.push(raws - 11*ang_step);
-                    }else{
-                        temp.push(raws);
-                    };
-                })     
-                manKi.update_cur_angle(temp);
-                // socketio.emit('command', {goals:manKi.raw_current});
+            let step_rot_val = ($('#rot-step-output').val())*12;
+            if(manKi.raw_current[i] - step_rot_val >= minvalue){
+                let temp = [0,0,0,0];
+                let tempRaw = [...manKi.raw_current];
+                temp[i] = manKi.raw_current[i] - step_rot_val;
+                tempRaw[i] = manKi.raw_current[i] - step_rot_val;    
+                manKi.update_cur_angle(tempRaw);
+                sendData(temp);
             };
         });
     };
 
+    // Gripper controller
+    $('#gripper-btn').click(()=>{
+        manKi.endEffector = (manKi.endEffector == 0)?1:0;
+        let buttonText =  (manKi.endEffector == 0)? "ON": "OFF";
+        $('#gripper-btn').html(buttonText);
+        sendData(manKi.raw_current);
+    });
+
+    // main
     manipulator.init();
     loadRobots(manipulator);
     
     function render() {
         setTimeout(()=>{
-            if(manKi.update == true){
-                update_data(manKi.raw_current);
-                manKi.update = false;
-            };
+            update_data(manKi.raw_current);
             manipulator.drawing(canvas);
             requestAnimationFrame(render);
         }, 1000/100)
