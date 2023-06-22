@@ -19,7 +19,8 @@ const DOWNjoin_btns = ["#btn-down-join1","#btn-down-join2","#btn-down-join3","#b
 // current angle
 const join_currents = ["#cur-join1","#cur-join2","#cur-join3","#cur-join4"];
 // initial data
-var init_data = [2045,1500,2500,2045];
+var init_data = [2045,2565,2507,2098];
+// var init_data = [2045,2045,2045,2045];
 // Mathjs and kinematic
 var manKi = new Mankinematic(init_data);
 // Threejs
@@ -49,7 +50,7 @@ const robot_parts = [
         name: 'link2',
         coordinate: new THREE.Object3D(),
         path: './static/js/threejs/model/Link_02.stl',
-        angle: {x:-Math.PI/2, y:Math.PI/2, z: Math.PI/2},  
+        angle: {x:Math.PI/2, y:Math.PI/2, z:-Math.PI/2},  
         // rotation angle y: MATH.PI/2 = initial point
         position: {x: 0,y:0,z:0,},
         colors: { color: 'red', specular: 0x111111, shininess: 10 },
@@ -60,7 +61,7 @@ const robot_parts = [
         name: 'link3',
         coordinate: new THREE.Object3D(),
         path: './static/js/threejs/model/Link_03.stl',
-        angle: {x:Math.PI/2, y:0, z:0},  
+        angle: {x:-Math.PI/2, y:0, z:0},  
         // rotation angle x MATH.PI/2 = initial point
         position: {x:0,y:6.4,z: 1.2,},
         colors: { color: 'yellow', specular: 0x111111, shininess: 10},
