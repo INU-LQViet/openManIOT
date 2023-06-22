@@ -19,7 +19,7 @@ const DOWNjoin_btns = ["#btn-down-join1","#btn-down-join2","#btn-down-join3","#b
 // current angle
 const join_currents = ["#cur-join1","#cur-join2","#cur-join3","#cur-join4"];
 // initial data
-var init_data = [2045,2045,2045,2045];
+var init_data = [2045,1500,2500,2045];
 // Mathjs and kinematic
 var manKi = new Mankinematic(init_data);
 // Threejs
@@ -49,7 +49,7 @@ const robot_parts = [
         name: 'link2',
         coordinate: new THREE.Object3D(),
         path: './static/js/threejs/model/Link_02.stl',
-        angle: {x:Math.PI/2, y:Math.PI/2, z: -Math.PI/2},  
+        angle: {x:-Math.PI/2, y:Math.PI/2, z: Math.PI/2},  
         // rotation angle y: MATH.PI/2 = initial point
         position: {x: 0,y:0,z:0,},
         colors: { color: 'red', specular: 0x111111, shininess: 10 },
@@ -187,7 +187,7 @@ $(document).ready(()=>{
         $('#dis-step-input').val(1);
         $('#rot-step-input').val(10);
 
-        manKi.update_endEffector(0);
+        manKi.update_endEffector(1600);
         manKi.update_cur_angle(init_data);
         // console.log(manKi.raw_current);
         sendData(init_data);
@@ -250,32 +250,32 @@ $(document).ready(()=>{
             let maxvalue = 3068;
             let step_rot_val = ($('#rot-step-output').val())*12;
             if(manKi.raw_current[i] + step_rot_val <= maxvalue){
-                let temp = [0,0,0,0];
+                // let temp = [0,0,0,0];
                 let tempRaw = [...manKi.raw_current];
-                temp[i] = manKi.raw_current[i] + step_rot_val;
+                // temp[i] = manKi.raw_current[i] + step_rot_val;
                 tempRaw[i] = manKi.raw_current[i] + step_rot_val;      
                 manKi.update_cur_angle(tempRaw);
-                sendData(temp);
+                sendData(tempRaw);
             };
         });
         $(DOWNjoin_btns[i]).click(()=>{
             let minvalue = 1023;
             let step_rot_val = ($('#rot-step-output').val())*12;
             if(manKi.raw_current[i] - step_rot_val >= minvalue){
-                let temp = [0,0,0,0];
+                // let temp = [0,0,0,0];
                 let tempRaw = [...manKi.raw_current];
-                temp[i] = manKi.raw_current[i] - step_rot_val;
+                // temp[i] = manKi.raw_current[i] - step_rot_val;
                 tempRaw[i] = manKi.raw_current[i] - step_rot_val;    
                 manKi.update_cur_angle(tempRaw);
-                sendData(temp);
+                sendData(tempRaw);
             };
         });
     };
 
     // Gripper controller
     $('#gripper-btn').click(()=>{
-        manKi.endEffector = (manKi.endEffector == 0)?1:0;
-        let buttonText =  (manKi.endEffector == 0)? "ON": "OFF";
+        manKi.endEffector = (manKi.endEffector == 1600)?420:1600;
+        let buttonText =  (manKi.endEffector == 420)? "ON": "OFF";
         $('#gripper-btn').html(buttonText);
         sendData(manKi.raw_current);
     });

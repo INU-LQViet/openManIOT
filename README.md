@@ -6,7 +6,9 @@ This is the web application to control a Open manipulator through website using 
     - Start the project
     - Add the landing page
     - Add the firebase client
-
+- 23-06-22:
+    - Change the initial position
+    - fix bugs and improve performance
 
 ## Requirement
 - Html, CSS, Javascript, firebased,

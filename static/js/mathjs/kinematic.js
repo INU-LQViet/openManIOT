@@ -49,7 +49,7 @@ export default class Mankinematic{
         this.raw_current = initial_raw_current;
         this.cur_T;
         this.update_cur_T();
-        this.endEffector = 0;
+        this.endEffector = 1600;
     };
 
     calSlist(){
